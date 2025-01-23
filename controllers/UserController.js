@@ -1,5 +1,6 @@
 const { where } = require("sequelize");
 const { Usuario } = require("../models");
+const bcrypt = require("bcrypt");
 
 const UserController = {
   viewsForm: (req, res) => {
@@ -9,10 +10,11 @@ const UserController = {
   registerUser: async (req, res) => {
     const { nome, email, senha } = req.body;
     try {
+      const senhaHash = await bcrypt.hash(senha, 10);
       const user = await Usuario.create({
         nome,
         email,
-        senha,
+        senha: senhaHash,
       });
       console.log("usuer criado ", user);
       res.redirect("/users/login");
@@ -35,10 +37,11 @@ const UserController = {
         },
       });
       if (!userEmail) {
-        return res.status(400).send("Senha invalida");
+        return res.status(400).send("usuario nao encontrado");
       }
 
-      if (senha != userEmail.senha) {
+      const compareSenha = await bcrypt.compare(senha, userEmail.senha);
+      if (!compareSenha) {
         return res.status(400).send("senha invalda");
       }
 
