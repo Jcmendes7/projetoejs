@@ -7,5 +7,6 @@ router.get("/cadastrar", UserController.viewsForm);
 router.post("/cadastrar", UserController.registerUser);
 router.get("/login", UserController.getLoginForm);
 router.post("/login", UserController.userLogin);
+router.get("/usuario", UserController.getUsers);
 
 module.exports = router;
