@@ -8,17 +8,36 @@ const UserController = {
 
   registerUser: async (req, res) => {
     const { nome, email, senha } = req.body;
+
+    // Verificar se todos os campos obrigatórios foram fornecidos
+    if (!nome || !email || !senha) {
+      return res
+        .status(400)
+        .json({ message: "Todos os campos são obrigatórios" });
+    }
+
     try {
+      // Verifica se o email já está registrado
+      const userExistente = await Usuario.findOne({ where: { email } });
+      if (userExistente) {
+        return res.status(400).json({ message: "Email já cadastrado" });
+      }
+
+      // Criptografa a senha
       const senhaHash = await bcrypt.hash(senha, 10);
+
+      // Cria o usuário no banco de dados
       const user = await Usuario.create({
         nome,
         email,
         senha: senhaHash,
       });
-      console.log("usuer criado ", user);
-      res.redirect("/users/login");
+
+      console.log("Usuário criado: ", user);
+      res.redirect("/users/login"); // ou poderia retornar uma resposta JSON de sucesso
     } catch (error) {
-      console.log("usuer criado", error);
+      console.log("Erro ao criar usuário:", error);
+      res.status(500).json({ message: "Erro interno ao criar usuário" });
     }
   },
 
